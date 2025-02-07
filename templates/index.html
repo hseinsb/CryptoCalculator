@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Analysis Bot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="container">
+        <div class="logout-container">
+            <a href="{{ url_for('logout') }}" class="logout-btn">🚪 Logout</a>
+        </div>
+        
+        <h1>🔮 Crypto Analyzer</h1>
+        
+        <!-- Added Solana Note -->
+        <div class="solana-notice">
+            <div class="notice-content">
+                <span class="notice-icon">ℹ️</span>
+                <span class="notice-text">
+                    <strong>Important:</strong> This analyzer only works with Solana trading pairs.
+                    Please ensure you're entering a valid Solana token pair address.
+                </span>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <form id="cryptoForm">
+                <input
+                    type="text"
+                    id="tokenAddress"
+                    placeholder="Enter trading pair address (e.g., 83v8iPyZihDEjDdY8RdZddyZNyUtXngz69Lgo9Kt5d6d for SOL/USDC)"
+                    required
+                >
+                <button type="submit">Analyze</button>
+            </form>
+        </div>
+
+        <div id="results">
+            <!-- Results will appear here -->
+        </div>
+
+        <div id="loading" class="loading-container" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Analyzing... Please wait</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("cryptoForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const address = document.getElementById("tokenAddress").value;
+            const resultsDiv = document.getElementById("results");
+            const loadingDiv = document.getElementById("loading");
+
+            // Show loading animation
+            loadingDiv.style.display = "flex";
+            resultsDiv.innerHTML = "";
+
+            try {
+                const response = await fetch("/fetch", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `tokenAddress=${encodeURIComponent(address)}`
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Hide loading animation and show results
+                loadingDiv.style.display = "none";
+                resultsDiv.innerHTML = data.response;
+
+                // Smooth scroll to results
+                resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                loadingDiv.style.display = "none";
+                resultsDiv.innerHTML = `
+                    <div class="error-card">
+                        <div class="error-icon">❌</div>
+                        <div class="error-message">Error: ${error.message}</div>
+                        <div class="error-hint">Please check the trading pair address and try again.</div>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
