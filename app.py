@@ -9,7 +9,8 @@ import logging
 load_dotenv()  # Load environment variables from a .env file
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Secret key for session management
+# Use a static secret key instead of a random one to maintain sessions between invocations
+app.secret_key = os.getenv("PASSWORD") or "default-secret-key-for-sessions"  
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -316,3 +317,6 @@ def fetch():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    
+# This is needed for Vercel serverless deployment
+app = app
