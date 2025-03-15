@@ -318,5 +318,5 @@ def fetch():
 if __name__ == "__main__":
     app.run(debug=True)
     
-# This is needed for Vercel serverless deployment
-app = app
+# This makes the app variable directly accessible when imported
+# which is important for Vercel serverless functions
